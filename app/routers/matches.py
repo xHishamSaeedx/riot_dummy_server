@@ -14,11 +14,17 @@ async def get_match_data(request: MatchRequest):
         request: MatchRequest containing the match_id
         
     Returns:
-        MatchResponse with 10 dummy players and their stats
+        MatchResponse with dummy players and their stats:
+        - For test_match_123: 10 players (players 1-7 and 18-20)
+        - For other matches: 20 players
     """
     try:
-        # Generate dummy data using the service
-        match_data = MatchService.generate_dummy_players(request.match_id)
+        # Use special method for test_match_123 to get 20 players with specific requirements
+        if request.match_id == "test_match_123":
+            match_data = MatchService.generate_special_test_match_data()
+        else:
+            # Generate dummy data using the service for other match IDs
+            match_data = MatchService.generate_dummy_players(request.match_id)
         return match_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating match data: {str(e)}")

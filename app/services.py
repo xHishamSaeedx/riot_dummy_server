@@ -30,7 +30,7 @@ class MatchService:
             match_id: The match identifier
             
         Returns:
-            MatchResponse with 10 dummy players, match start time, and map
+            MatchResponse with 20 dummy players, match start time, and map
         """
         players = []
         
@@ -49,8 +49,8 @@ class MatchService:
             # Randomly select a Valorant map
             map_name = random.choice(MatchService.VALORANT_MAPS)
         
-        # Generate 10 dummy players with correlated kills and ACS
-        for i in range(10):
+        # Generate 20 dummy players with correlated kills and ACS
+        for i in range(20):
             player_id = f"player_{match_id}_{i+1}"
             kills = random.randint(0, 25)  # Random kills between 0-25
             
@@ -110,4 +110,52 @@ class MatchService:
         return PlayerMatchHistory(
             player_id=player_id,
             recent_matches=recent_matches
+        )
+
+    @staticmethod
+    def generate_special_test_match_data() -> MatchResponse:
+        """
+        Generate dummy player data specifically for test_match_123 with 10 players,
+        where only the first 7 and last 3 players actually played the game.
+        
+        Returns:
+            MatchResponse with 10 dummy players (players 1-7 and 18-20) who actually played
+        """
+        players = []
+        
+        # Fixed match start time for test_match_123
+        match_start_time = datetime(2024, 1, 15, 14, 30, 0)  # January 15, 2024 at 2:30 PM
+        map_name = "Ascent"  # Fixed map for test_match_123
+        
+        # Only include players who actually played: players 1-7 and 18-20
+        # This gives us 10 total players (7 + 3 = 10)
+        player_indices = list(range(7)) + list(range(17, 20))  # [0,1,2,3,4,5,6,17,18,19]
+        
+        for i in player_indices:
+            player_id = f"player_test_match_123_{i+1}"
+            
+            kills = random.randint(0, 25)  # Random kills between 0-25
+            
+            # Base ACS calculation based on kills
+            base_acs = 150 + (kills * 8)  # Base ACS increases with kills
+            
+            # Add some variation (±15% of base ACS)
+            variation = random.uniform(-0.15, 0.15)
+            average_combat_score = round(base_acs * (1 + variation), 2)
+            
+            # Ensure ACS stays within reasonable bounds (150-350)
+            average_combat_score = max(150.0, min(350.0, average_combat_score))
+            
+            player_stats = PlayerStats(
+                player_id=player_id,
+                kills=kills,
+                average_combat_score=average_combat_score
+            )
+            players.append(player_stats)
+        
+        return MatchResponse(
+            match_id="test_match_123",
+            match_start_time=match_start_time,
+            map=map_name,
+            players=players
         )
